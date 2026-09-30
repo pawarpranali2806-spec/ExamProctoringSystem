@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}System Check | {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding-top: 2rem; padding-bottom: 3rem;">
+
+  <!-- Progress Stepper -->
+  <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-cyan); font-weight: 700;">
+      <span style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent-cyan); color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">1</span>
+      System Check
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-weight: 600;">
+      <span style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">2</span>
+      Face Verification
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-weight: 600;">
+      <span style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">3</span>
+      Examination
+    </div>
+  </div>
+
+  <div class="glass-card" style="padding: 2.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">System Readiness Diagnostics</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Exam: <strong>{{ exam.title }}</strong> &bull; Please ensure camera and microphone permissions are granted.
+      </p>
+    </div>
+
+    <!-- Live Diagnostic Video Preview -->
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+      <div style="width: 100%; max-width: 480px; height: 320px; background: #000; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--border-glass); position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.7);">
+        <video id="previewVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+        <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Microphone Level</span>
+          <div style="width: 180px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+            <div id="micMeterFill" style="width: 0%; height: 100%; background: var(--risk-normal); transition: width 0.1s ease;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist with Badges -->
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: var(--radius-sm);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <i class="fa-solid fa-camera" style="color: var(--accent-cyan); font-size: 1.2rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: #fff;">Camera Video Feed</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">Real-time frame ingestion</div>
+          </div>
+        </div>
+        <div id="camStatus" class="status-pill status-warning"><span class="status-dot"></span> Checking...</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: var(--radius-sm);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <i class="fa-solid fa-microphone" style="color: var(--accent-blue); font-size: 1.2rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: #fff;">Microphone Input</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">Acoustic anomaly tracking</div>
+          </div>
+        </div>
+        <div id="micStatus" class="status-pill status-warning"><span class="status-dot"></span> Checking...</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: var(--radius-sm);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <i class="fa-solid fa-face-smile" style="color: var(--accent-violet); font-size: 1.2rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: #fff;">Face Detection Engine</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">MediaPipe facial landmark resolution</div>
+          </div>
+        </div>
+        <div id="faceStatus" class="status-pill status-warning"><span class="status-dot"></span> Checking...</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: var(--radius-sm);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <i class="fa-solid fa-window-maximize" style="color: var(--risk-normal); font-size: 1.2rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: #fff;">Browser Capabilities</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">Fullscreen &amp; WebRTC APIs support</div>
+          </div>
+        </div>
+        <div id="browserStatus" class="status-pill status-warning"><span class="status-dot"></span> Checking...</div>
+      </div>
+
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <button id="retestBtn" type="button" class="btn btn-outline">
+        <i class="fa-solid fa-rotate-right"></i> Re-test Hardware
+      </button>
+
+      <a id="proceedBtn" href="{{ url_for('student.face_verification', exam_id=exam.id) }}" class="btn btn-outline" style="pointer-events: none; opacity: 0.5;">
+        Continue to Face Verification <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/system_check.js') }}"></script>
+<script>
+  // Ensure proceed button updates active state when enabled
+  const observer = new MutationObserver(() => {
+    const btn = document.getElementById('proceedBtn');
+    if (btn && !btn.disabled) {
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    }
+  });
+  const btn = document.getElementById('proceedBtn');
+  if (btn) observer.observe(btn, { attributes: true });
+</script>
+{% endblock %}

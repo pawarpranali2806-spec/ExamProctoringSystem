@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Exams | Administrator{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Examination Management</h1>
+      <p style="color: var(--text-muted);">Create, configure, publish, and populate examinations</p>
+    </div>
+    <a href="{{ url_for('admin.create_exam') }}" class="btn btn-primary">
+      <i class="fa-solid fa-plus"></i> Create New Exam
+    </a>
+  </div>
+
+  <div class="glass-card" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Duration</th>
+            <th>Questions</th>
+            <th>Passing Mark</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exam in exams %}
+            <tr>
+              <td>
+                <strong style="font-size: 1rem; color: #fff;">{{ exam.title }}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-dim); max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  {{ exam.description }}
+                </div>
+              </td>
+              <td>{{ exam.duration_minutes }} Mins</td>
+              <td><strong style="color: var(--accent-cyan);">{{ exam.total_questions }}</strong> Qs</td>
+              <td>{{ exam.passing_score }}%</td>
+              <td>
+                <form method="POST" action="{{ url_for('admin.toggle_publish', exam_id=exam.id) }}" style="display: inline;">
+                  <button type="submit" class="status-pill {% if exam.is_published %}status-normal{% else %}status-warning{% endif %}" style="cursor: pointer; border: none;">
+                    <span class="status-dot"></span> {{ 'Published' if exam.is_published else 'Draft' }}
+                  </button>
+                </form>
+              </td>
+              <td style="color: var(--text-dim); font-size: 0.8rem;">{{ exam.created_at.strftime('%Y-%m-%d') }}</td>
+              <td>
+                <div style="display: flex; gap: 0.4rem;">
+                  <a href="{{ url_for('admin.manage_questions', exam_id=exam.id) }}" class="btn btn-outline btn-sm" title="Manage Questions">
+                    <i class="fa-solid fa-list"></i> Questions ({{ exam.total_questions }})
+                  </a>
+                  <a href="{{ url_for('admin.edit_exam', exam_id=exam.id) }}" class="btn btn-outline btn-sm" title="Edit Settings">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('admin.delete_exam', exam_id=exam.id) }}" onsubmit="return confirm('Are you sure you want to delete this exam and all its questions?');" style="display: inline;">
+                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--risk-critical);" title="Delete Exam">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                No exams created yet. Click "Create New Exam" to build your first proctored test.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

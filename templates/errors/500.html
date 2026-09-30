@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}500 - Internal Anomaly{% endblock %}
+
+{% block content %}
+<div class="container" style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 200px); text-align: center;">
+  <div class="glass-card" style="padding: 3rem; max-width: 500px;">
+    <div style="font-size: 3.5rem; font-weight: 900; color: var(--risk-warning); font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem;">500</div>
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Internal Engine Anomaly</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">The server encountered an unexpected situation while processing the vision feed.</p>
+    <a href="{{ url_for('landing') }}" class="btn btn-primary">Return to Portal</a>
+  </div>
+</div>
+{% endblock %}

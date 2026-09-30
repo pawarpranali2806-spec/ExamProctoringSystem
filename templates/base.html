@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Panopticon AI{% endblock %} | Online Exam Proctoring</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="{{ url_for('landing') }}" class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-eye" style="color:#050811; font-size:1.1rem;"></i>
+      </div>
+      <div class="brand-text">
+        PANOPTICON <span>AI</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      {% if current_user.is_authenticated %}
+        {% if current_user.is_admin %}
+          <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="fa-solid fa-chart-line"></i> Admin Dashboard</a></li>
+          <li><a href="{{ url_for('admin.list_exams') }}" class="nav-link"><i class="fa-solid fa-book-open"></i> Manage Exams</a></li>
+          <li><a href="{{ url_for('admin.list_attempts') }}" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Proctoring Audits</a></li>
+        {% else %}
+          <li><a href="{{ url_for('student.dashboard') }}" class="nav-link"><i class="fa-solid fa-graduation-cap"></i> Student Portal</a></li>
+        {% endif %}
+      {% else %}
+        <li><a href="{{ url_for('landing') }}#features" class="nav-link">Features</a></li>
+        <li><a href="{{ url_for('landing') }}#architecture" class="nav-link">AI Architecture</a></li>
+      {% endif %}
+    </ul>
+
+    <div class="nav-user">
+      {% if current_user.is_authenticated %}
+        <div class="user-badge">
+          <i class="fa-regular fa-user" style="color:var(--accent-cyan)"></i>
+          <span>{{ current_user.full_name }}</span>
+          <span class="role-pill {{ current_user.role }}">{{ current_user.role }}</span>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">
+          <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+        </a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm">Sign In</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Flash Notification Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash-alert {{ category }}">
+            <span><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <strong>PROJECT PANOPTICON</strong> &bull; Advanced Autonomous Computer Vision Proctoring &copy; {{ current_year }}
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

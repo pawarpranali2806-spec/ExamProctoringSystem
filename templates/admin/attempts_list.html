@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Proctoring Audits | Administrator{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Candidate Session Audits</h1>
+      <p style="color: var(--text-muted);">Review proctoring integrity records, telemetry, and suspicious alerts</p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="glass-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+    <form method="GET" action="{{ url_for('admin.list_attempts') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+      <div style="flex: 1; min-width: 250px;">
+        <input type="text" name="q" class="form-control" placeholder="Search candidate name, email, or exam title..." value="{{ search_query }}">
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.list_attempts', q=search_query) }}" class="btn btn-sm {% if not selected_risk %}btn-primary{% else %}btn-outline{% endif %}">
+          All ({{ attempts|length }})
+        </a>
+        <a href="{{ url_for('admin.list_attempts', risk='NORMAL', q=search_query) }}" class="btn btn-sm {% if selected_risk == 'NORMAL' %}btn-primary{% else %}btn-outline{% endif %}">
+          Normal
+        </a>
+        <a href="{{ url_for('admin.list_attempts', risk='WARNING', q=search_query) }}" class="btn btn-sm {% if selected_risk == 'WARNING' %}btn-primary{% else %}btn-outline{% endif %}">
+          Warning
+        </a>
+        <a href="{{ url_for('admin.list_attempts', risk='HIGH_RISK', q=search_query) }}" class="btn btn-sm {% if selected_risk == 'HIGH_RISK' %}btn-primary{% else %}btn-outline{% endif %}">
+          High Risk
+        </a>
+        <a href="{{ url_for('admin.list_attempts', risk='CRITICAL', q=search_query) }}" class="btn btn-sm {% if selected_risk == 'CRITICAL' %}btn-primary{% else %}btn-outline{% endif %}">
+          Critical
+        </a>
+      </div>
+
+      <button type="submit" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-magnifying-glass"></i> Filter
+      </button>
+    </form>
+  </div>
+
+  <!-- Attempts Table -->
+  <div class="glass-card" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Exam Title</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Integrity Status</th>
+            <th>Peak Risk</th>
+            <th>Warnings</th>
+            <th>Duration</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for att in attempts %}
+            <tr>
+              <td>
+                <strong style="color: #fff;">{{ att.student.full_name }}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">{{ att.student.email }}</div>
+              </td>
+              <td>{{ att.exam.title }}</td>
+              <td>
+                <span class="status-pill {% if att.status == 'completed' %}status-normal{% else %}status-warning{% endif %}">
+                  <span class="status-dot"></span> {{ att.status }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ att.score }} / {{ att.max_score }}</strong> ({{ att.percentage|round(1) }}%)
+              </td>
+              <td>
+                <span class="status-pill status-{{ att.proctoring_status.lower() }}">
+                  <span class="status-dot"></span> {{ att.proctoring_status }}
+                </span>
+              </td>
+              <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">
+                {{ att.max_risk_score|round(1) }}%
+              </td>
+              <td>
+                {% if att.warnings.count() > 0 %}
+                  <span style="color: var(--risk-warning); font-weight: 700;">{{ att.warnings.count() }}</span>
+                {% else %}
+                  <span style="color: var(--text-dim);">0</span>
+                {% endif %}
+              </td>
+              <td style="color: var(--text-dim);">{{ att.duration_formatted }}</td>
+              <td style="color: var(--text-dim); font-size: 0.8rem;">{{ att.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>
+                <a href="{{ url_for('admin.attempt_report', attempt_id=att.id) }}" class="btn btn-outline btn-sm">
+                  <i class="fa-solid fa-file-waveform"></i> Audit Report
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                No candidate sessions found matching the filter criteria.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

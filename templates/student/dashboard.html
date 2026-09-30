@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+  <!-- Welcome Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Candidate Portal</h1>
+      <p style="color: var(--text-muted);">Welcome, {{ current_user.full_name }} &bull; Ready for your examinations</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <span class="status-pill status-normal">
+        <span class="status-dot"></span> System Connected
+      </span>
+    </div>
+  </div>
+
+  <!-- Active In-Progress Exams (if any) -->
+  {% if active_attempts %}
+    <div class="glass-card" style="margin-bottom: 2rem; border-color: var(--accent-cyan); background: rgba(0, 242, 254, 0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="color: var(--accent-cyan); font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-clock-rotate-left"></i> Ongoing Exam In Progress
+        </h3>
+        <span class="status-pill status-warning"><span class="status-dot"></span> In Progress</span>
+      </div>
+      {% for att in active_attempts %}
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h4 style="font-size: 1.15rem; margin-bottom: 0.25rem;">{{ att.exam.title }}</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              Started: {{ att.started_at.strftime('%Y-%m-%d %H:%M') }} &bull; Allowed: {{ att.exam.duration_minutes }} minutes
+            </p>
+          </div>
+          <a href="{{ url_for('student.take_exam', attempt_id=att.id) }}" class="btn btn-primary">
+            <i class="fa-solid fa-play"></i> Resume Examination Now
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Available Exams Section -->
+  <div style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.4rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Available Examinations
+    </h2>
+
+    {% if available_exams %}
+      <div class="grid-2">
+        {% for exam in available_exams %}
+          <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1.25rem; color: #fff;">{{ exam.title }}</h3>
+                <span class="status-pill status-low_risk">
+                  <span class="status-dot"></span> {{ exam.duration_minutes }} Mins
+                </span>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                {{ exam.description or "Comprehensive proctored assessment requiring camera and microphone verification." }}
+              </p>
+            </div>
+
+            <div>
+              <div style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem;">
+                <div><strong style="color: #fff;">{{ exam.total_questions }}</strong> Questions</div>
+                <div><strong style="color: #fff;">{{ exam.total_points }}</strong> Total Points</div>
+                <div>Passing: <strong style="color: var(--accent-cyan);">{{ exam.passing_score }}%</strong></div>
+              </div>
+
+              <a href="{{ url_for('student.system_check', exam_id=exam.id) }}" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-shield-halved"></i> Start Pre-Exam Verification
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="glass-card" style="text-align: center; padding: 3rem;">
+        <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; color: var(--text-dim); margin-bottom: 1rem;"></i>
+        <h3 style="color: var(--text-muted);">No published exams currently available</h3>
+        <p style="color: var(--text-dim); font-size: 0.9rem;">Check back once your institution publishes new exam schedules.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Completed Exams & Results Section -->
+  <div style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.4rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fa-solid fa-square-poll-vertical" style="color: var(--accent-blue);"></i> Completed Exam Records
+    </h2>
+
+    {% if completed_results %}
+      <div class="glass-card" style="padding: 0;">
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Exam Title</th>
+                <th>Score</th>
+                <th>Percentage</th>
+                <th>Result</th>
+                <th>Proctoring Status</th>
+                <th>Date Taken</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for res in completed_results %}
+                <tr>
+                  <td><strong>{{ res.exam.title if res.exam else "Examination" }}</strong></td>
+                  <td>{{ res.score }} / {{ res.max_score }}</td>
+                  <td><strong>{{ res.percentage }}%</strong></td>
+                  <td>
+                    {% if res.passed %}
+                      <span class="status-pill status-normal"><span class="status-dot"></span> PASSED</span>
+                    {% else %}
+                      <span class="status-pill status-critical"><span class="status-dot"></span> FAILED</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="status-pill status-{{ res.proctoring_status.lower() }}">
+                      <span class="status-dot"></span> {{ res.proctoring_status }}
+                    </span>
+                  </td>
+                  <td style="color: var(--text-dim);">{{ res.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td>
+                    <a href="{{ url_for('student.exam_result', attempt_id=res.attempt_id) }}" class="btn btn-outline btn-sm">
+                      <i class="fa-solid fa-eye"></i> View Summary
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="text-align: center; padding: 2.5rem;">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">You have not completed any exams yet.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Warnings Log -->
+  {% if recent_warnings %}
+    <div>
+      <h2 style="font-size: 1.4rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-triangle-exclamation" style="color: var(--risk-warning);"></i> Recent Proctoring Notices
+      </h2>
+      <div class="glass-card">
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+          {% for w in recent_warnings %}
+            <li style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+              <div>
+                <span class="status-pill status-warning" style="margin-right: 0.75rem;">{{ w.event_type }}</span>
+                <span style="font-size: 0.9rem; color: var(--text-main);">{{ w.description }}</span>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--text-dim);">{{ w.timestamp.strftime('%H:%M:%S') }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

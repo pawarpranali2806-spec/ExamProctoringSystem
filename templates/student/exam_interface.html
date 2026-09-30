@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Portal | {{ exam.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/exam.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Real-Time Top Warning Banner Toast -->
+<div id="warningToast" class="warning-toast">
+  <div class="warning-icon">!</div>
+  <div>
+    <div style="font-weight: 700; font-size: 0.95rem; color: #ff6b8b;">PROCTORING NOTICE ISSUED</div>
+    <div id="warningDesc" style="font-size: 0.85rem; color: #f0f4fc;">Please face the screen directly and avoid looking away.</div>
+  </div>
+</div>
+
+<div class="exam-viewport">
+
+  <!-- Left: Main Examination & Questions Pane -->
+  <div class="exam-main">
+    
+    <!-- Exam Header with Title, Progress, and Live Countdown Timer -->
+    <div class="exam-header-bar">
+      <div class="exam-title-badge">
+        <i class="fa-solid fa-graduation-cap" style="color: var(--accent-cyan);"></i>
+        <span>{{ exam.title }}</span>
+      </div>
+
+      <div class="exam-timer">
+        <i class="fa-regular fa-clock"></i>
+        <span id="examCountdown">--:--</span>
+      </div>
+    </div>
+
+    <!-- Questions Container -->
+    <div class="question-card">
+      {% for q in questions %}
+        {% set q_idx = loop.index0 %}
+        {% set chosen_opt = existing_answers.get(q.id) %}
+        
+        <div class="question-item-card" data-index="{{ q_idx }}" style="display: {% if q_idx == 0 %}block{% else %}none{% endif %};">
+          <div class="question-header">
+            <div class="q-number">Question {{ loop.index }} of {{ questions|length }}</div>
+            <div class="q-points">{{ q.points }} Point{% if q.points > 1 %}s{% endif %}</div>
+          </div>
+
+          <div class="question-text">{{ q.question_text }}</div>
+
+          <div class="options-list">
+            <!-- Option A -->
+            <div class="option-item {% if chosen_opt == 'A' %}selected{% endif %}" data-question-id="{{ q.id }}" data-option="A">
+              <div class="option-prefix">A</div>
+              <div class="option-label">{{ q.option_a }}</div>
+            </div>
+
+            <!-- Option B -->
+            <div class="option-item {% if chosen_opt == 'B' %}selected{% endif %}" data-question-id="{{ q.id }}" data-option="B">
+              <div class="option-prefix">B</div>
+              <div class="option-label">{{ q.option_b }}</div>
+            </div>
+
+            <!-- Option C -->
+            <div class="option-item {% if chosen_opt == 'C' %}selected{% endif %}" data-question-id="{{ q.id }}" data-option="C">
+              <div class="option-prefix">C</div>
+              <div class="option-label">{{ q.option_c }}</div>
+            </div>
+
+            <!-- Option D -->
+            <div class="option-item {% if chosen_opt == 'D' %}selected{% endif %}" data-question-id="{{ q.id }}" data-option="D">
+              <div class="option-prefix">D</div>
+              <div class="option-label">{{ q.option_d }}</div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <!-- Navigation & Action Controls -->
+      <div class="question-footer">
+        <button id="prevQBtn" type="button" class="btn btn-outline" disabled>
+          <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button id="nextQBtn" type="button" class="btn btn-outline">
+            Next <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button id="openSubmitModalBtn" type="button" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Submit Exam
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: Real-time AI Proctoring HUD & Palette -->
+  <div class="proctor-sidebar">
+
+    <!-- Live Proctoring Camera Video Feed with HUD scanline -->
+    <div class="video-container">
+      <video id="webcamVideo" autoplay playsinline muted></video>
+      <div class="video-scanline"></div>
+      <div class="hud-tag"><i class="fa-solid fa-circle" style="color:var(--risk-critical); font-size: 0.5rem;"></i> AI MONITORING ACTIVE</div>
+    </div>
+
+    <!-- Live Proctoring HUD Metrics Card -->
+    <div class="hud-card">
+      <div class="hud-card-title">
+        <span>Cheating Risk Assessment</span>
+        <span id="hudRiskStatus" class="status-pill status-normal"><span class="status-dot"></span> NORMAL</span>
+      </div>
+
+      <div class="risk-meter-container">
+        <div class="risk-meter-header">
+          <span style="font-size: 0.75rem; color: var(--text-dim);">Aggregated Threat Index</span>
+          <span id="hudRiskScore" class="risk-score-value">0%</span>
+        </div>
+        <div class="risk-bar">
+          <div id="hudRiskFill" class="risk-fill"></div>
+        </div>
+      </div>
+
+      <div class="hud-indicators">
+        <div class="indicator-box">
+          <div class="indicator-label">Candidate Face</div>
+          <div id="hudFace" class="indicator-value"><span style="color:var(--risk-normal)">1 Verified</span></div>
+        </div>
+
+        <div class="indicator-box">
+          <div class="indicator-label">Eye Gaze</div>
+          <div id="hudGaze" class="indicator-value">CENTER</div>
+        </div>
+
+        <div class="indicator-box">
+          <div class="indicator-label">Head Pose</div>
+          <div id="hudHead" class="indicator-value">FORWARD</div>
+        </div>
+
+        <div class="indicator-box">
+          <div class="indicator-label">Mobile Device</div>
+          <div id="hudPhone" class="indicator-value"><span style="color:var(--text-dim)">Clear</span></div>
+        </div>
+
+        <div class="indicator-box">
+          <div class="indicator-label">Audio Level</div>
+          <div id="hudAudio" class="indicator-value">NORMAL</div>
+        </div>
+
+        <div class="indicator-box">
+          <div class="indicator-label">Browser Status</div>
+          <div id="hudBrowser" class="indicator-value" style="color:var(--risk-normal)">Secured</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Palette Card -->
+    <div class="hud-card">
+      <div class="hud-card-title">
+        <span>Question Palette</span>
+        <span style="font-size: 0.75rem; color: var(--text-dim);">Click to jump</span>
+      </div>
+
+      <div class="palette-grid">
+        {% for q in questions %}
+          {% set q_idx = loop.index0 %}
+          {% set is_ans = q.id in existing_answers %}
+          <button 
+            type="button" 
+            class="palette-btn {% if q_idx == 0 %}current{% endif %} {% if is_ans %}answered{% endif %}"
+            data-index="{{ q_idx }}"
+            data-question-id="{{ q.id }}">
+            {{ loop.index }}
+          </button>
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.72rem; color: var(--text-dim);">
+        <div style="display: flex; align-items: center; gap: 0.3rem;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; background: rgba(0,245,155,0.4); border: 1px solid var(--risk-normal);"></span> Answered
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.3rem;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--accent-cyan);"></span> Current
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.3rem;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; background: rgba(255,255,255,0.08);"></span> Unvisited
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Submit Confirmation Modal -->
+<div id="submitModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(0,242,254,0.15); color: var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 1rem;">
+        <i class="fa-solid fa-file-circle-check"></i>
+      </div>
+      <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Submit Your Examination?</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Once confirmed, answers will be locked and graded instantly.</p>
+    </div>
+
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.75rem; display: flex; justify-content: space-around; text-align: center;">
+      <div>
+        <div id="modalAnsweredCount" style="font-size: 1.4rem; font-weight: 700; color: var(--risk-normal);">0</div>
+        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Answered</div>
+      </div>
+      <div style="border-left: 1px solid var(--border-subtle);"></div>
+      <div>
+        <div id="modalRemainingCount" style="font-size: 1.4rem; font-weight: 700; color: var(--risk-warning);">0</div>
+        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Unanswered</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+      <button id="cancelSubmitBtn" type="button" class="btn btn-outline">Keep Reviewing</button>
+      <button id="confirmSubmitBtn" type="button" class="btn btn-primary">Confirm &amp; Finish</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.PANOPTICON_CONFIG = {
+    attemptId: {{ attempt.id }},
+    totalQuestions: {{ questions|length }},
+    remainingSeconds: {{ remaining_seconds }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/proctoring_client.js') }}"></script>
+{% endblock %}

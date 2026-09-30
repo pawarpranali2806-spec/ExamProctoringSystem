@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Exam | Panopticon{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 650px; padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('admin.list_exams') }}" style="color: var(--text-dim); font-size: 0.85rem;">
+      &larr; Back to Examination List
+    </a>
+  </div>
+
+  <div class="glass-card" style="padding: 2.5rem;">
+    <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem;">{{ action }} Examination</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
+      Configure the assessment rules, timer limits, and publication status.
+    </p>
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label" for="title">Exam Title</label>
+        <input type="text" id="title" name="title" class="form-control" value="{{ exam.title if exam else '' }}" placeholder="e.g. Advanced Cybersecurity & AI Ethics" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Instructions / Candidate Guidelines</label>
+        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Specify instructions: Candidates must maintain forward eye contact, no headphones, no smartphones allowed in room...">{{ exam.description if exam else '' }}</textarea>
+      </div>
+
+      <div class="grid-2" style="gap: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label" for="duration_minutes">Duration (Minutes)</label>
+          <input type="number" id="duration_minutes" name="duration_minutes" class="form-control" value="{{ exam.duration_minutes if exam else 30 }}" min="5" max="360" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passing_score">Passing Threshold (%)</label>
+          <input type="number" id="passing_score" name="passing_score" class="form-control" value="{{ exam.passing_score if exam else 60 }}" min="1" max="100" required>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 0.5rem; margin-bottom: 2rem;">
+        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #fff; font-weight: 500;">
+          <input type="checkbox" name="is_published" value="1" {% if exam and exam.is_published %}checked{% endif %}>
+          Publish immediately (Visible in student candidate portal)
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <a href="{{ url_for('admin.list_exams') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Save Exam Configuration
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

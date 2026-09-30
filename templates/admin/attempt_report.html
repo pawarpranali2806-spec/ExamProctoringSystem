@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Proctoring Audit Report | {{ student.full_name }} - {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; padding-top: 2rem; padding-bottom: 5rem;">
+
+  <!-- Header Bar with Print Button -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;" class="no-print">
+    <div>
+      <a href="{{ url_for('admin.list_attempts') }}" style="color: var(--text-dim); font-size: 0.85rem;">
+        &larr; Back to Sessions Audit List
+      </a>
+      <h1 style="font-size: 1.8rem; margin-top: 0.25rem;">Candidate Proctoring Audit Dossier</h1>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <button onclick="window.print()" class="btn btn-primary">
+        <i class="fa-solid fa-print"></i> Print / Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Formal Printable Report Card -->
+  <div class="glass-card" style="padding: 2.5rem; margin-bottom: 2rem;">
+    
+    <!-- Report Title Banner -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-glass); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+      <div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-cyan); font-weight: 700;">
+          PROJECT PANOPTICON &bull; OFFICIAL AUDIT REPORT
+        </div>
+        <h2 style="font-size: 1.6rem; margin: 0.25rem 0 0.5rem;">{{ exam.title }}</h2>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">
+          Session ID: <code>#ATT-{{ "%06d"|format(attempt.id) }}</code> &bull; Generated: {{ current_year }}
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem;">Final Proctoring Clearance</div>
+        <span class="status-pill status-{{ attempt.proctoring_status.lower() }}" style="font-size: 0.95rem; padding: 0.4rem 1.1rem;">
+          <span class="status-dot"></span> {{ attempt.proctoring_status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Candidate & Exam Metadata Grid -->
+    <div class="grid-2" style="gap: 1.5rem; margin-bottom: 2rem;">
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fa-solid fa-user"></i> Candidate Details
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem;">
+          <div><span style="color: var(--text-dim);">Full Name:</span> <strong>{{ student.full_name }}</strong></div>
+          <div><span style="color: var(--text-dim);">Email:</span> {{ student.email }}</div>
+          <div><span style="color: var(--text-dim);">Username:</span> <code>{{ student.username }}</code></div>
+        </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: var(--accent-blue); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fa-solid fa-clock"></i> Session Timeline
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem;">
+          <div><span style="color: var(--text-dim);">Started:</span> {{ attempt.started_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+          <div><span style="color: var(--text-dim);">Completed:</span> {{ attempt.completed_at.strftime('%Y-%m-%d %H:%M:%S') if attempt.completed_at else 'In Progress' }}</div>
+          <div><span style="color: var(--text-dim);">Total Duration:</span> <strong>{{ attempt.duration_formatted }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scores & Academic Assessment -->
+    <div class="grid-3" style="gap: 1.25rem; margin-bottom: 2.5rem; text-align: center;">
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Academic Score</div>
+        <div style="font-size: 1.9rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff; margin: 0.25rem 0;">
+          {{ attempt.score }} / {{ attempt.max_score }}
+        </div>
+        <div style="font-size: 0.85rem; color: var(--accent-cyan);">{{ attempt.percentage|round(1) }}% Earned</div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Pass / Fail Status</div>
+        <div style="margin: 0.75rem 0;">
+          {% if attempt.passed %}
+            <span class="status-pill status-normal" style="font-size: 0.9rem;"><span class="status-dot"></span> PASSED</span>
+          {% else %}
+            <span class="status-pill status-critical" style="font-size: 0.9rem;"><span class="status-dot"></span> FAILED</span>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Pass Mark: {{ exam.passing_score }}%</div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Peak Threat Index</div>
+        <div style="font-size: 1.9rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: {% if attempt.max_risk_score > 65 %}var(--risk-critical){% elif attempt.max_risk_score > 40 %}var(--risk-warning){% else %}var(--risk-normal){% endif %}; margin: 0.25rem 0;">
+          {{ attempt.max_risk_score|round(1) }}%
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Warnings Issued: {{ warnings|length }}</div>
+      </div>
+    </div>
+
+    <!-- Infractions Summary Breakdown -->
+    <div style="margin-bottom: 2.5rem;">
+      <h3 style="font-size: 1.15rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-chart-pie" style="color: var(--accent-violet);"></i> Infractions Breakdown
+      </h3>
+      {% if event_breakdown %}
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          {% for ev_type, count in event_breakdown.items() %}
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.5rem 0.85rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="color: var(--text-muted);">{{ ev_type }}:</span>
+              <strong style="color: var(--risk-warning);">{{ count }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="font-size: 0.9rem; color: var(--risk-normal);"><i class="fa-solid fa-circle-check"></i> Exemplary Session: Zero infractions logged.</p>
+      {% endif %}
+    </div>
+
+    <!-- Formal Warnings Log -->
+    {% if warnings %}
+      <div style="margin-bottom: 2.5rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--risk-warning); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Formal Candidate Warnings ({{ warnings|length }})
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          {% for w in warnings %}
+            <div style="background: rgba(255, 184, 0, 0.07); border: 1px solid rgba(255, 184, 0, 0.3); border-radius: var(--radius-sm); padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+              <div>
+                <strong style="color: var(--risk-warning); margin-right: 0.5rem;">[{{ w.event_type }}]</strong>
+                <span>{{ w.description }}</span>
+              </div>
+              <span style="color: var(--text-dim); font-size: 0.8rem;">{{ w.timestamp.strftime('%H:%M:%S') }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Detailed Proctoring Event Timeline -->
+    <div style="margin-bottom: 3rem;">
+      <h3 style="font-size: 1.15rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-timeline" style="color: var(--accent-cyan);"></i> Chronological Telemetry Log ({{ events|length }})
+      </h3>
+
+      {% if events %}
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="custom-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Event Type</th>
+                <th>Severity</th>
+                <th>Confidence</th>
+                <th>Risk &Delta;</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ev in events %}
+                <tr>
+                  <td style="font-family: 'JetBrains Mono', monospace; color: var(--text-dim);">{{ ev.timestamp.strftime('%H:%M:%S') }}</td>
+                  <td><strong>{{ ev.event_type }}</strong></td>
+                  <td>
+                    <span class="status-pill {% if ev.severity == 'CRITICAL' %}status-critical{% elif ev.severity == 'HIGH' %}status-high_risk{% elif ev.severity == 'MEDIUM' %}status-warning{% else %}status-low_risk{% endif %}" style="font-size: 0.7rem;">
+                      {{ ev.severity }}
+                    </span>
+                  </td>
+                  <td>{{ (ev.confidence * 100)|round(0)|int }}%</td>
+                  <td style="color: var(--accent-cyan);">+{{ ev.risk_increment }}</td>
+                  <td style="color: var(--text-muted);">{{ ev.details }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p style="font-size: 0.9rem; color: var(--text-muted);">No security events recorded during this exam session.</p>
+      {% endif %}
+    </div>
+
+    <!-- Question Answers Audit -->
+    <div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-list-check" style="color: var(--accent-blue);"></i> Candidate Answer Verification
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for q in questions %}
+          {% set ans = user_answers.get(q.id) %}
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span class="q-number">Question {{ loop.index }}</span>
+              <span>
+                {% if ans and ans.is_correct %}
+                  <span class="status-pill status-normal"><span class="status-dot"></span> Correct (+{{ q.points }})</span>
+                {% elif ans %}
+                  <span class="status-pill status-critical"><span class="status-dot"></span> Incorrect (0)</span>
+                {% else %}
+                  <span class="status-pill status-warning"><span class="status-dot"></span> Unanswered</span>
+                {% endif %}
+              </span>
+            </div>
+            <div style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem;">{{ q.question_text }}</div>
+            <div style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text-dim);">
+              <div>Selected: <strong style="color: #fff;">{{ ans.selected_option if ans else "None" }}</strong></div>
+              <div>Correct Key: <strong style="color: var(--risk-normal);">{{ q.correct_option }}</strong></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

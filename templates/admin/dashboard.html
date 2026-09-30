@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrator Control Center{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Administrator Control Center</h1>
+      <p style="color: var(--text-muted);">Real-time examination telemetry, risk analytics, and candidate audits</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{{ url_for('admin.create_exam') }}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Create New Exam
+      </a>
+      <a href="{{ url_for('admin.list_attempts') }}" class="btn btn-outline">
+        <i class="fa-solid fa-shield-halved"></i> All Attempts
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric KPI Cards -->
+  <div class="grid-4" style="margin-bottom: 2rem;">
+    
+    <div class="glass-card">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+        <span>Registered Students</span>
+        <i class="fa-solid fa-user-graduate" style="color: var(--accent-cyan);"></i>
+      </div>
+      <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff;">
+        {{ total_students }}
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Enrolled candidates</div>
+    </div>
+
+    <div class="glass-card">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+        <span>Exams Published</span>
+        <i class="fa-solid fa-book" style="color: var(--accent-blue);"></i>
+      </div>
+      <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff;">
+        {{ total_exams }}
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Active question sets</div>
+    </div>
+
+    <div class="glass-card">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+        <span>Completed Sessions</span>
+        <i class="fa-solid fa-square-check" style="color: var(--risk-normal);"></i>
+      </div>
+      <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff;">
+        {{ completed_attempts }} <span style="font-size: 1.1rem; color: var(--text-dim); font-weight: 400;">/ {{ total_attempts }}</span>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Graded submissions</div>
+    </div>
+
+    <div class="glass-card">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+        <span>Suspicious Flags</span>
+        <i class="fa-solid fa-triangle-exclamation" style="color: var(--risk-critical);"></i>
+      </div>
+      <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--risk-critical);">
+        {{ suspicious_count }}
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Elevated risk level</div>
+    </div>
+
+  </div>
+
+  <!-- Analytics Charts Row -->
+  <div class="grid-2" style="margin-bottom: 2.5rem;">
+    
+    <!-- Doughnut Chart: Risk Level Distribution -->
+    <div class="glass-card">
+      <h3 style="font-size: 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-chart-pie" style="color: var(--accent-cyan);"></i> Proctoring Risk Distribution
+      </h3>
+      <div style="height: 240px; position: relative;">
+        <canvas id="riskDoughnutChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Bar Chart: Incident Categories -->
+    <div class="glass-card">
+      <h3 style="font-size: 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-chart-column" style="color: var(--accent-violet);"></i> Infractions by Event Type
+      </h3>
+      <div style="height: 240px; position: relative;">
+        <canvas id="infractionsBarChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recent Attempts Table -->
+  <div class="glass-card" style="padding: 0;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-blue);"></i> Recent Candidate Sessions
+      </h3>
+      <a href="{{ url_for('admin.list_attempts') }}" style="font-size: 0.85rem; color: var(--accent-cyan);">
+        View all attempts &rarr;
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Exam Title</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Risk Status</th>
+            <th>Peak Threat</th>
+            <th>Warnings</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for att in recent_attempts %}
+            <tr>
+              <td>
+                <strong>{{ att.student.full_name }}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">{{ att.student.email }}</div>
+              </td>
+              <td>{{ att.exam.title }}</td>
+              <td>
+                <span class="status-pill {% if att.status == 'completed' %}status-normal{% else %}status-warning{% endif %}">
+                  <span class="status-dot"></span> {{ att.status }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ att.score }} / {{ att.max_score }}</strong> ({{ att.percentage|round(1) }}%)
+              </td>
+              <td>
+                <span class="status-pill status-{{ att.proctoring_status.lower() }}">
+                  <span class="status-dot"></span> {{ att.proctoring_status }}
+                </span>
+              </td>
+              <td style="font-family: 'JetBrains Mono', monospace;">{{ att.max_risk_score|round(1) }}%</td>
+              <td>{{ att.warnings.count() }}</td>
+              <td style="color: var(--text-dim); font-size: 0.8rem;">{{ att.started_at.strftime('%m-%d %H:%M') }}</td>
+              <td>
+                <a href="{{ url_for('admin.attempt_report', attempt_id=att.id) }}" class="btn btn-outline btn-sm">
+                  <i class="fa-solid fa-file-shield"></i> Audit Report
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                No candidate attempts recorded yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Risk Doughnut Chart
+    const ctxDoughnut = document.getElementById('riskDoughnutChart').getContext('2d');
+    new Chart(ctxDoughnut, {
+      type: 'doughnut',
+      data: {
+        labels: ['Normal', 'Low Risk', 'Warning', 'High Risk', 'Critical'],
+        datasets: [{
+          data: [
+            {{ risk_distribution['NORMAL'] }},
+            {{ risk_distribution['LOW_RISK'] }},
+            {{ risk_distribution['WARNING'] }},
+            {{ risk_distribution['HIGH_RISK'] }},
+            {{ risk_distribution['CRITICAL'] }}
+          ],
+          backgroundColor: [
+            '#00f59b',
+            '#00d2ff',
+            '#ffb800',
+            '#ff6b35',
+            '#ff2a5f'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+          }
+        },
+        cutout: '65%'
+      }
+    });
+
+    // 2. Load Real-time Infractions Bar Chart via API
+    fetch('/api/admin/stats')
+      .then(res => res.json())
+      .then(data => {
+        const ctxBar = document.getElementById('infractionsBarChart').getContext('2d');
+        const infKeys = Object.keys(data.infraction_counts);
+        const infValues = Object.values(data.infraction_counts);
+
+        new Chart(ctxBar, {
+          type: 'bar',
+          data: {
+            labels: infKeys.map(k => k.replace('_', ' ')),
+            datasets: [{
+              label: 'Infraction Count',
+              data: infValues,
+              backgroundColor: 'rgba(0, 242, 254, 0.4)',
+              borderColor: '#00f2fe',
+              borderWidth: 1.5,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                ticks: { color: '#94a3b8', font: { size: 10 } },
+                grid: { display: false }
+              },
+              y: {
+                ticks: { color: '#94a3b8', stepSize: 1 },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      });
+  });
+</script>
+{% endblock %}

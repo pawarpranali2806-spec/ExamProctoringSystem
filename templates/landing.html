@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Next-Gen AI Online Exam Proctoring{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3.5rem; padding-bottom: 4rem;">
+
+  <!-- Hero Section -->
+  <div style="text-align: center; max-width: 860px; margin: 0 auto 4.5rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); padding: 0.4rem 1rem; border-radius: var(--radius-full); font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 1.5rem; font-weight: 600;">
+      <span class="status-dot" style="background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></span>
+      AUTONOMOUS COMPUTER VISION PROCTORING SYSTEM
+    </div>
+
+    <h1 style="font-size: 3.2rem; line-height: 1.15; margin-bottom: 1.5rem; font-weight: 800;">
+      Defend Academic Integrity with <span style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Zero-Compromise AI</span>
+    </h1>
+
+    <p style="font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.7;">
+      Project Panopticon combines MediaPipe 468-point face mesh, YOLOv8 multi-class object detection, 3D head pose estimation, and audio frequency anomaly detection into a unified, fair, confidence-weighted cheating risk engine.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
+      {% if current_user.is_authenticated %}
+        {% if current_user.is_admin %}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-gauge-high"></i> Open Admin Dashboard
+          </a>
+          <a href="{{ url_for('admin.list_exams') }}" class="btn btn-outline btn-lg">
+            <i class="fa-solid fa-folder-plus"></i> Manage Exams
+          </a>
+        {% else %}
+          <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-rocket"></i> Go to Student Portal
+          </a>
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+          <i class="fa-solid fa-user-plus"></i> Get Started Free
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-lg">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Account
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Live Stats Bar -->
+  <div class="grid-4" style="margin-bottom: 5rem;">
+    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;">468</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Facial Mesh Landmarks</div>
+    </div>
+    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace;">YOLOv8</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Real-Time Mobile &amp; Person AI</div>
+    </div>
+    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-violet); font-family: 'JetBrains Mono', monospace;">&lt; 50ms</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Telemetry Latency</div>
+    </div>
+    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--risk-normal); font-family: 'JetBrains Mono', monospace;">100%</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Automated Audit Logging</div>
+    </div>
+  </div>
+
+  <!-- Core AI Capabilities Grid -->
+  <div id="features" style="margin-bottom: 5rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 style="font-size: 2.2rem; margin-bottom: 0.75rem;">Multi-Layered AI Vision Suite</h2>
+      <p style="color: var(--text-muted); max-width: 650px; margin: 0 auto;">Continuous parallel inference tracks every potential vector of unauthorized assistance without false positives.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(0, 242, 254, 0.15); border: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-user-check" style="font-size: 1.3rem; color: var(--accent-cyan);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">Biometric Face Verification</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Prevents impersonation by ensuring exactly one authorized candidate is centered in view, flagging any missing candidate or secondary face in real time.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(79, 172, 254, 0.15); border: 1px solid rgba(79, 172, 254, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-eye" style="font-size: 1.3rem; color: var(--accent-blue);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">Iris &amp; Gaze Vectoring</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Computes iris-to-eye-corner aspect ratios to detect suspicious horizontal and vertical gaze directions, distinguishing between natural blinks and sustained looking away.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(138, 43, 226, 0.15); border: 1px solid rgba(138, 43, 226, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-compass" style="font-size: 1.3rem; color: var(--accent-violet);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">3D Head Pose (PnP)</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Solves Perspective-n-Point Euler rotation angles (Pitch, Yaw, Roll) using 3D generic facial models to catch turned heads and concealed reference material.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(255, 42, 95, 0.15); border: 1px solid rgba(255, 42, 95, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-mobile-screen" style="font-size: 1.3rem; color: var(--risk-critical);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">YOLOv8 Phone Detection</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Detects mobile phones, smartphones, and unauthorized smart devices within milliseconds using ultralight YOLOv8 neural network inference.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(255, 184, 0, 0.15); border: 1px solid rgba(255, 184, 0, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-waveform-lines" style="font-size: 1.3rem; color: var(--risk-warning);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">Acoustic Anomaly Monitor</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Tracks ambient sound levels through client Web Audio APIs, distinguishing background white noise from unauthorized verbal communication and whispered hints.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); background: rgba(0, 245, 155, 0.15); border: 1px solid rgba(0, 245, 155, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-shield-heart" style="font-size: 1.3rem; color: var(--risk-normal);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.6rem;">Adaptive Risk Engine</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Combines multi-factor evidence with persistence time windows and risk decay to ensure honest students are never penalised for brief, harmless movements.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <div id="architecture" style="margin-bottom: 5rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 style="font-size: 2.2rem; margin-bottom: 0.75rem;">End-to-End Examination Workflow</h2>
+      <p style="color: var(--text-muted);">From pre-flight system diagnostics to automated cryptographic-grade audit logs.</p>
+    </div>
+
+    <div class="grid-4">
+      <div class="glass-card" style="position: relative;">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 10px; right: 15px;">01</div>
+        <h4 style="font-size: 1.1rem; color: var(--accent-cyan); margin-bottom: 0.5rem;">System Check</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Camera, microphone, network readiness, and browser capabilities are verified with clear PASS/FAIL indicators.
+        </p>
+      </div>
+      <div class="glass-card" style="position: relative;">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 10px; right: 15px;">02</div>
+        <h4 style="font-size: 1.1rem; color: var(--accent-blue); margin-bottom: 0.5rem;">Biometrics</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Candidate facial presence is confirmed with MediaPipe to prevent exam entry if unverified or obstructed.
+        </p>
+      </div>
+      <div class="glass-card" style="position: relative;">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 10px; right: 15px;">03</div>
+        <h4 style="font-size: 1.1rem; color: var(--accent-violet); margin-bottom: 0.5rem;">Live Exam HUD</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Questions, instant answer auto-saving, countdown timer, and a real-time proctoring telemetry overlay.
+        </p>
+      </div>
+      <div class="glass-card" style="position: relative;">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 10px; right: 15px;">04</div>
+        <h4 style="font-size: 1.1rem; color: var(--risk-normal); margin-bottom: 0.5rem;">Audit Reports</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Administrators review full event timelines, warning logs, peak risk scores, and printable reports.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom CTA Card -->
+  <div class="glass-card" style="text-align: center; padding: 3.5rem 2rem; background: linear-gradient(135deg, rgba(14, 21, 38, 0.9), rgba(20, 30, 60, 0.95)); border-color: rgba(0, 242, 254, 0.3);">
+    <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">Ready to Experience Next-Gen Proctoring?</h2>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem;">
+      Log in with demo credentials or create a new student account to run the live proctoring engine.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Panopticon
+      </a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-violet btn-lg">
+        <i class="fa-solid fa-user-plus"></i> Create Student Account
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
