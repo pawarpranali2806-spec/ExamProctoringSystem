@@ -1,14 +1,21 @@
+import os
+import sys
 from datetime import datetime, timedelta, timezone
 from app import create_app
 from database import db
 from database.models import User, Exam, Question, ExamAttempt, Answer, ProctoringEvent, Warning, Result
 
 
-def seed():
-    app = create_app('development')
+def seed(config_name=None, drop_existing=True):
+    if config_name is None:
+        config_name = os.environ.get('FLASK_CONFIG', 'production')
+    app = create_app(config_name)
     with app.app_context():
-        print("[Seed] Dropping and recreating tables...")
-        db.drop_all()
+        if drop_existing:
+            print(f"[Seed] Dropping and recreating tables for config: {config_name}...")
+            db.drop_all()
+        else:
+            print(f"[Seed] Creating tables (preserving existing) for config: {config_name}...")
         db.create_all()
 
         print("[Seed] Creating users...")
@@ -384,4 +391,5 @@ def seed():
 
 
 if __name__ == '__main__':
-    seed()
+    cfg = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('FLASK_CONFIG', 'production')
+    seed(cfg)
